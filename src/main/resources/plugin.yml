@@ -1,0 +1,4 @@
+name: CTFPlugin
+version: ${project.version}
+main: ctf.ctfplugin.CTFPlugin
+api-version: 1.19
