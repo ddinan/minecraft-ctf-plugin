@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Team;
 
 public final class CTFPlugin extends JavaPlugin implements Listener {
     public static CaptureTheFlagGame game;
@@ -29,7 +30,17 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
     }
 
     @Override
-    public void onDisable() { }
+    public void onDisable() {
+        // Unregister teams
+        if (game.scoreboard != null) {
+            game.scoreboard.getTeams().forEach(Team::unregister);
+        }
+
+        // Cancel the game timer if it's running
+        if (game.gameTimer != null && !game.gameTimer.isCancelled()) {
+            game.gameTimer.cancel();
+        }
+    }
 
     @EventHandler
     public void handlePlayerJoin(PlayerJoinEvent event) {

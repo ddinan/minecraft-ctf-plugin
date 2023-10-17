@@ -2,6 +2,9 @@ package ctf.ctfplugin;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -13,16 +16,19 @@ import org.bukkit.scoreboard.Team;
 import static org.bukkit.Bukkit.*;
 
 public class CaptureTheFlagGame {
-    private Location redFlagLocation;
-    private Location blueFlagLocation;
+    public static Location redFlagLocation;
+    public static Location blueFlagLocation;
 
-    private BukkitRunnable gameTimer;
+    public static Player redFlagCarrier = null;
+    public static Player blueFlagCarrier = null;
+
+    public BukkitRunnable gameTimer;
     private BossBar bossBar;
 
-    Scoreboard scoreboard;
-    Team redTeam;
-    Team blueTeam;
-    Team spectatorTeam;
+    public Scoreboard scoreboard;
+    public static Team redTeam;
+    public static Team blueTeam;
+    public static Team spectatorTeam;
 
     public CaptureTheFlagGame(Location redFlagLocation, Location blueFlagLocation) {
         this.redFlagLocation = redFlagLocation;
@@ -134,14 +140,41 @@ public class CaptureTheFlagGame {
     }
 
     public void captureFlag(Player player) {
-        return;
+        if (redTeam.hasEntry(player.getName())) {
+            respawnFlag("blue");
+        }
+
+        else if (blueTeam.hasEntry(player.getName())) {
+            respawnFlag("red");
+        }
+
+        // TODO: Increment points, and update game score
     }
 
-    public Location getRedFlagLocation() {
-        return redFlagLocation;
+    void respawnFlag(String team) {
+        World world = getWorld("world");
+        Location location = new Location(world, 0, 0, 0);
+        Material material = Material.MAGMA_BLOCK;
+
+        if (team.equalsIgnoreCase("red")) {
+            location = redFlagLocation;
+            material = Material.RED_WOOL;
+            redFlagCarrier = null;
+        }
+
+        else if (team.equalsIgnoreCase("blue")) {
+            location = blueFlagLocation;
+            material = Material.BLUE_WOOL;
+            blueFlagCarrier = null;
+        }
+
+        Block block = location.getBlock();
+        block.setType(material);
     }
 
-    public Location getBlueFlagLocation() {
-        return blueFlagLocation;
+    public void messageWorld(World world, String message) {
+        for (Player player : world.getPlayers()) {
+            player.sendMessage(message);
+        }
     }
 }
