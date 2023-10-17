@@ -2,3 +2,8 @@ name: CTFPlugin
 version: ${project.version}
 main: ctf.ctfplugin.CTFPlugin
 api-version: 1.19
+commands:
+  join:
+    description: Joins a team.
+    usage: /<command> [red|blue|spectator]
+    permission: ranks.player

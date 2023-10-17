@@ -1,26 +1,28 @@
 package ctf.ctfplugin;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.bukkit.Bukkit.createBossBar;
-import static org.bukkit.Bukkit.getOnlinePlayers;
+import static org.bukkit.Bukkit.*;
 
 public class CaptureTheFlagGame {
-    private Map<Player, Boolean> redTeam = new HashMap<>();
-    private Map<Player, Boolean> blueTeam = new HashMap<>();
     private Location redFlagLocation;
     private Location blueFlagLocation;
 
     private BukkitRunnable gameTimer;
     private BossBar bossBar;
+
+    Scoreboard scoreboard;
+    Team redTeam;
+    Team blueTeam;
+    Team spectatorTeam;
 
     public CaptureTheFlagGame(Location redFlagLocation, Location blueFlagLocation) {
         this.redFlagLocation = redFlagLocation;
@@ -28,6 +30,19 @@ public class CaptureTheFlagGame {
 
         // Start the game timer
         startGameTimer();
+        setUpScoreboard();
+    }
+
+    private void setUpScoreboard() {
+        scoreboard = getScoreboardManager().getMainScoreboard();
+        redTeam = scoreboard.registerNewTeam("Red");
+        blueTeam = scoreboard.registerNewTeam("Blue");
+        spectatorTeam = scoreboard.registerNewTeam("Spectator");
+
+        // Set team options as needed
+        redTeam.setPrefix(ChatColor.RED.toString());
+        blueTeam.setPrefix(ChatColor.BLUE.toString());
+        spectatorTeam.setPrefix(ChatColor.GRAY.toString());
     }
 
     private void startGameTimer() {
@@ -77,29 +92,49 @@ public class CaptureTheFlagGame {
         startGameTimer();
     }
 
+    public boolean joinTeam(Player player, String team) {
+        if (team == "red") {
+            if (!redTeam.hasEntry(player.getName())) {
+                if (blueTeam.getSize() <= redTeam.getSize()) {
+                    redTeam.addEntry(player.getName());
+                    blueTeam.removeEntry(player.getName());
+                    spectatorTeam.removeEntry(player.getName());
 
-    public void joinRedTeam(Player player) {
-        redTeam.put(player, false);
-    }
+                    player.setDisplayName(ChatColor.RED + player.getName());
+                    player.setPlayerListName(ChatColor.RED + player.getName());
 
-    public void joinBlueTeam(Player player) {
-        blueTeam.put(player, false);
+                    return true;
+                }
+            }
+        } else if (team == "blue") {
+            if (!blueTeam.hasEntry(player.getName())) {
+                if (redTeam.getSize() <= blueTeam.getSize()) {
+                    blueTeam.addEntry(player.getName());
+                    redTeam.removeEntry(player.getName());
+                    spectatorTeam.removeEntry(player.getName());
+
+                    player.setDisplayName(ChatColor.BLUE + player.getName());
+                    player.setPlayerListName(ChatColor.BLUE + player.getName());
+
+                    return true;
+                }
+            }
+        } else if (team == "spectator") {
+            spectatorTeam.addEntry(player.getName());
+            redTeam.removeEntry(player.getName());
+            blueTeam.removeEntry(player.getName());
+
+            player.setDisplayName(ChatColor.GRAY + player.getName());
+            player.setPlayerListName(ChatColor.GRAY + player.getName());
+
+            return true;
+        }
+
+        return false; // Player is already in a team or teams are not balanced
     }
 
     public void captureFlag(Player player) {
-        if (redTeam.containsKey(player) && !redTeam.get(player)) {
-            redTeam.put(player, true);
-        } else if (blueTeam.containsKey(player) && !blueTeam.get(player)) {
-            blueTeam.put(player, true);
-        }
-    }
-
-    public boolean isRedFlagCaptured() {
-        return redTeam.values().stream().allMatch(captured -> captured);
-    }
-
-    public boolean isBlueFlagCaptured() {
-        return blueTeam.values().stream().allMatch(captured -> captured);
+        return;
     }
 
     public Location getRedFlagLocation() {

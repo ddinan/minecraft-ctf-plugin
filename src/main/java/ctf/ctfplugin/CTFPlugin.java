@@ -1,5 +1,6 @@
 package ctf.ctfplugin;
 
+import ctf.ctfplugin.commands.JoinCommand;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,7 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CTFPlugin extends JavaPlugin implements Listener {
-    CaptureTheFlagGame game;
+    public static CaptureTheFlagGame game;
 
     @Override
     public void onEnable() {
@@ -22,6 +23,9 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
 
         // Set up game event listeners
         getServer().getPluginManager().registerEvents(new EventListener(game), this);
+
+        // Register commands
+        this.getCommand("join").setExecutor(new JoinCommand());
     }
 
     @Override
