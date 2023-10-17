@@ -41,15 +41,29 @@ public class CaptureTheFlagGame {
 
     private void setUpScoreboard() {
         scoreboard = getScoreboardManager().getMainScoreboard();
-        redTeam = scoreboard.registerNewTeam("Red");
-        blueTeam = scoreboard.registerNewTeam("Blue");
-        spectatorTeam = scoreboard.registerNewTeam("Spectator");
 
-        // Set team options as needed
-        redTeam.setPrefix(ChatColor.RED.toString());
-        blueTeam.setPrefix(ChatColor.BLUE.toString());
-        spectatorTeam.setPrefix(ChatColor.GRAY.toString());
+        redTeam = scoreboard.getTeam("Red");
+
+        if (redTeam == null) {
+            redTeam = scoreboard.registerNewTeam("Red");
+            redTeam.setPrefix(ChatColor.RED.toString());
+        }
+
+        blueTeam = scoreboard.getTeam("Blue");
+
+        if (blueTeam == null) {
+            blueTeam = scoreboard.registerNewTeam("Blue");
+            blueTeam.setPrefix(ChatColor.BLUE.toString());
+        }
+
+        spectatorTeam = scoreboard.getTeam("Spectator");
+
+        if (spectatorTeam == null) {
+            spectatorTeam = scoreboard.registerNewTeam("Spectator");
+            spectatorTeam.setPrefix(ChatColor.GRAY.toString());
+        }
     }
+
 
     private void startGameTimer() {
         bossBar = createBossBar("Time Left: 5:00", BarColor.GREEN, BarStyle.SOLID);
@@ -67,7 +81,9 @@ public class CaptureTheFlagGame {
                 if (timeLeft > 0) {
                     timeLeft--;
                     updateBossBar(timeLeft);
-                } else {
+                }
+
+                else {
                     // Reset the game after the timer is over
                     resetGame();
                 }
@@ -112,7 +128,9 @@ public class CaptureTheFlagGame {
                     return true;
                 }
             }
-        } else if (team == "blue") {
+        }
+
+        else if (team == "blue") {
             if (!blueTeam.hasEntry(player.getName())) {
                 if (redTeam.getSize() <= blueTeam.getSize()) {
                     blueTeam.addEntry(player.getName());
@@ -125,7 +143,9 @@ public class CaptureTheFlagGame {
                     return true;
                 }
             }
-        } else if (team == "spectator") {
+        }
+
+        else if (team == "spectator") {
             spectatorTeam.addEntry(player.getName());
             redTeam.removeEntry(player.getName());
             blueTeam.removeEntry(player.getName());
