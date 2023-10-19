@@ -13,6 +13,7 @@ import org.bukkit.util.FileUtil;
 
 import java.io.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
 
@@ -29,6 +30,9 @@ public class CaptureTheFlagGame {
 
     public static Player redFlagCarrier = null;
     public static Player blueFlagCarrier = null;
+
+    public static int redCaptures = 0;
+    public static int blueCaptures = 0;
 
     public static BukkitRunnable gameTimer;
     private static BossBar bossBar;
@@ -56,7 +60,7 @@ public class CaptureTheFlagGame {
     }
 
     private static void setUpTeams() {
-        scoreboard = getScoreboardManager().getMainScoreboard();
+        scoreboard = Objects.requireNonNull(getScoreboardManager()).getMainScoreboard();
 
         redTeam = scoreboard.getTeam("Red");
 
@@ -169,11 +173,21 @@ public class CaptureTheFlagGame {
         bossBar.setProgress((double) timeLeft / 300);
     }
 
+    public static void movePlayersToSpectator() {
+        for (Player player : getOnlinePlayers()) {
+            joinTeam(player, "spectator");
+        }
+    }
+
     public static void endGame(World newWorld) {
         // Reset game state, clear flags, etc.
         roundInProgress = false;
         redFlagCarrier = null;
         blueFlagCarrier = null;
+        redCaptures = 0;
+        blueCaptures = 0;
+
+        movePlayersToSpectator();
 
         // If no map was specified, choose a random map to start the game on
         if (newWorld == null) {
@@ -182,6 +196,7 @@ public class CaptureTheFlagGame {
 
         // Teleport players to the new world
         for (Player player : getOnlinePlayers()) {
+            assert newWorld != null;
             player.teleport(newWorld.getSpawnLocation());
         }
 
@@ -211,6 +226,7 @@ public class CaptureTheFlagGame {
 
             File[] files = source.listFiles();
 
+            assert files != null;
             for (File file : files) {
                 File toFile = new File(destination, file.getName());
 
@@ -243,7 +259,7 @@ public class CaptureTheFlagGame {
         return null;
     }
 
-    public boolean joinTeam(Player player, String team) {
+    public static boolean joinTeam(Player player, String team) {
         if (team.equalsIgnoreCase("red")) {
             if (!redTeam.hasEntry(player.getName())) {
                 if (blueTeam.getSize() <= redTeam.getSize()) {
@@ -297,12 +313,12 @@ public class CaptureTheFlagGame {
         return false; // Player is already in a team or teams are not balanced
     }
 
-    private void enableHacks(Player p) {
+    private static void enableHacks(Player p) {
         p.setAllowFlight(true);
         p.setFoodLevel(20);
     }
 
-    private void disableHacks(Player p) {
+    private static void disableHacks(Player p) {
         p.setFlying(false);
         p.setAllowFlight(false);
         p.setFoodLevel(0); // Prevents sprinting
@@ -311,13 +327,19 @@ public class CaptureTheFlagGame {
     public void captureFlag(Player player) {
         if (redTeam.hasEntry(player.getName())) {
             respawnFlag("blue");
+            redCaptures++;
         }
 
         else if (blueTeam.hasEntry(player.getName())) {
             respawnFlag("red");
+            blueCaptures++;
         }
 
-        // TODO: Increment points, and update game score
+        // TODO: Increment points
+
+        if (blueCaptures >= 5 || redCaptures >= 5) {
+            endGame(null);
+        }
     }
 
     static void respawnFlag(String team) {

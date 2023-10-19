@@ -1,7 +1,9 @@
 package ctf.ctfplugin;
 
-import ctf.ctfplugin.commands.*;
-import org.bukkit.Location;
+import ctf.ctfplugin.commands.JoinCommand;
+import ctf.ctfplugin.commands.MapsCommand;
+import ctf.ctfplugin.commands.NewGameCommand;
+import ctf.ctfplugin.commands.VisitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
