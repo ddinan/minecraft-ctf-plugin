@@ -16,11 +16,11 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
 
-        Location redFlagLocation = new Location(getServer().getWorld("world"), 76, 74, -5); // Set the coordinates
-        Location blueFlagLocation = new Location(getServer().getWorld("world"), 78, 74, -5); // Set the coordinates
+        Location redFlagPosition = new Location(getServer().getWorld("world"), 76, 74, -5); // Set the coordinates
+        Location blueFlagPosition = new Location(getServer().getWorld("world"), 78, 74, -5); // Set the coordinates
 
         // Create a game instance
-        game = new CaptureTheFlagGame(redFlagLocation, blueFlagLocation);
+        game = new CaptureTheFlagGame(redFlagPosition, blueFlagPosition);
 
         // Set up game event listeners
         getServer().getPluginManager().registerEvents(new EventListener(game), this);

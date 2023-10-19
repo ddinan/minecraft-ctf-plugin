@@ -13,7 +13,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 import static org.bukkit.Bukkit.*;
@@ -21,8 +24,10 @@ import static org.bukkit.Bukkit.*;
 public class CaptureTheFlagGame {
     public static boolean roundInProgress = false;
 
-    public static Location redFlagLocation;
-    public static Location blueFlagLocation;
+    public static Location redFlagPosition;
+    public static Location blueFlagPosition;
+    public static Location redSpawnPosition;
+    public static Location blueSpawnPosition;
 
     public static Player redFlagCarrier = null;
     public static Player blueFlagCarrier = null;
@@ -35,9 +40,13 @@ public class CaptureTheFlagGame {
     public static Team blueTeam;
     public static Team spectatorTeam;
 
-    public CaptureTheFlagGame(Location redFlagLocation, Location blueFlagLocation) {
-        this.redFlagLocation = redFlagLocation;
-        this.blueFlagLocation = blueFlagLocation;
+    public static World world;
+
+    public CaptureTheFlagGame(Location redFlagPosition, Location blueFlagPosition) {
+        this.redFlagPosition = redFlagPosition;
+        this.blueFlagPosition = blueFlagPosition;
+
+        world = chooseRandomMap();
 
         startGame();
     }
@@ -75,7 +84,42 @@ public class CaptureTheFlagGame {
     }
 
     private static void setUpMap() {
-        // TODO: Retrieve spawn and flag locations from the map's .properties file
+        Properties properties = new Properties();
+        FileInputStream input = null;
+
+        try {
+            // Load the properties file for the specific map
+            input = new FileInputStream("./maps/" + world.getName() + ".properties");
+            properties.load(input);
+
+            // Place flags in the right spot
+            redFlagPosition = parseLocation(properties.getProperty("redFlagPosition"));
+            blueFlagPosition = parseLocation(properties.getProperty("blueFlagPosition"));
+
+            respawnFlag("red");
+            respawnFlag("blue");
+
+            redSpawnPosition = parseLocation(properties.getProperty("redSpawnPosition"));
+            blueSpawnPosition = parseLocation(properties.getProperty("blueSpawnPosition"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static Location parseLocation(String input) {
+        String[] parts = input.split(",");
+        double x = Double.parseDouble(parts[0]);
+        double y = Double.parseDouble(parts[1]);
+        double z = Double.parseDouble(parts[2]);
+        return new Location(world, x, y, z);
     }
 
     private static void startGameTimer() {
@@ -133,6 +177,8 @@ public class CaptureTheFlagGame {
         if (newWorld == null) {
             newWorld = chooseRandomMap();
         }
+
+        world = newWorld;
 
         // Teleport players to the new world
         for (Player player : getOnlinePlayers()) {
@@ -212,19 +258,18 @@ public class CaptureTheFlagGame {
         // TODO: Increment points, and update game score
     }
 
-    void respawnFlag(String team) {
-        World world = getWorld("world");
+    static void respawnFlag(String team) {
         Location location = new Location(world, 0, 0, 0);
         Material material = Material.MAGMA_BLOCK;
 
         if (team.equalsIgnoreCase("red")) {
-            location = redFlagLocation;
+            location = redFlagPosition;
             material = Material.RED_WOOL;
             redFlagCarrier = null;
         }
 
         else if (team.equalsIgnoreCase("blue")) {
-            location = blueFlagLocation;
+            location = blueFlagPosition;
             material = Material.BLUE_WOOL;
             blueFlagCarrier = null;
         }

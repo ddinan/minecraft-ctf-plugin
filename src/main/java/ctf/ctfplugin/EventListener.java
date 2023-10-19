@@ -43,7 +43,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (clickedBlockLocation.equals(game.redFlagLocation)) {
+            if (clickedBlockLocation.equals(game.redFlagPosition)) {
                 if (blueTeam.hasEntry(p.getName())) {
                     if (game.redFlagCarrier == null) {
                         game.redFlagCarrier = p;
@@ -69,7 +69,7 @@ public class EventListener implements Listener {
                 event.setCancelled(true);
             }
 
-            else if (clickedBlockLocation.equals(game.blueFlagLocation)) {
+            else if (clickedBlockLocation.equals(game.blueFlagPosition)) {
                 if (redTeam.hasEntry(p.getName())) {
                     if (game.blueFlagCarrier == null) {
                         game.blueFlagCarrier = p;
