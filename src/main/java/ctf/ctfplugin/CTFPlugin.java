@@ -28,6 +28,7 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
         // Register commands
         this.getCommand("join").setExecutor(new JoinCommand());
         this.getCommand("maps").setExecutor(new MapsCommand());
+        this.getCommand("newgame").setExecutor(new NewGameCommand());
         this.getCommand("visit").setExecutor(new VisitCommand());
     }
 

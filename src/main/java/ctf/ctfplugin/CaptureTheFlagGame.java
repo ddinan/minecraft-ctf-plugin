@@ -13,6 +13,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.util.List;
+import java.util.Random;
+
 import static org.bukkit.Bukkit.*;
 
 public class CaptureTheFlagGame {
@@ -22,10 +25,10 @@ public class CaptureTheFlagGame {
     public static Player redFlagCarrier = null;
     public static Player blueFlagCarrier = null;
 
-    public BukkitRunnable gameTimer;
-    private BossBar bossBar;
+    public static BukkitRunnable gameTimer;
+    private static BossBar bossBar;
 
-    public Scoreboard scoreboard;
+    public static Scoreboard scoreboard;
     public static Team redTeam;
     public static Team blueTeam;
     public static Team spectatorTeam;
@@ -34,12 +37,16 @@ public class CaptureTheFlagGame {
         this.redFlagLocation = redFlagLocation;
         this.blueFlagLocation = blueFlagLocation;
 
-        // Start the game timer
-        startGameTimer();
-        setUpScoreboard();
+        startGame();
     }
 
-    private void setUpScoreboard() {
+    static void startGame() {
+        setUpTeams();
+        setUpMap();
+        startGameTimer(); // Start the game timer
+    }
+
+    private static void setUpTeams() {
         scoreboard = getScoreboardManager().getMainScoreboard();
 
         redTeam = scoreboard.getTeam("Red");
@@ -64,8 +71,15 @@ public class CaptureTheFlagGame {
         }
     }
 
+    private static void setUpMap() {
+        // TODO: Retrieve spawn and flag locations from the map's .properties file
+    }
 
-    private void startGameTimer() {
+    private static void startGameTimer() {
+        if (bossBar != null) {
+            bossBar.removeAll(); // Remove the old BossBar
+        }
+
         bossBar = createBossBar("Time Left: 5:00", BarColor.GREEN, BarStyle.SOLID);
         bossBar.setProgress(1.0);
 
@@ -85,7 +99,7 @@ public class CaptureTheFlagGame {
 
                 else {
                     // Reset the game after the timer is over
-                    resetGame();
+                    endGame(null);
                 }
             }
         };
@@ -97,7 +111,7 @@ public class CaptureTheFlagGame {
         bossBar.addPlayer(player);
     }
 
-    private void updateBossBar(int timeLeft) {
+    private static void updateBossBar(int timeLeft) {
         int minutes = timeLeft / 60;
         int seconds = timeLeft % 60;
 
@@ -106,16 +120,39 @@ public class CaptureTheFlagGame {
         bossBar.setProgress((double) timeLeft / 300);
     }
 
-    private void resetGame() {
+    public static void endGame(World newWorld) {
         // Reset game state, clear flags, etc.
+        redFlagCarrier = null;
+        blueFlagCarrier = null;
 
-        // Restart the timer
-        gameTimer.cancel();
-        startGameTimer();
+        // If no map was specified, choose a random map to start the game on
+        if (newWorld == null) {
+            newWorld = chooseRandomMap();
+        }
+
+        // Teleport players to the new world
+        for (Player player : getOnlinePlayers()) {
+            player.teleport(newWorld.getSpawnLocation());
+        }
+
+        gameTimer.cancel(); // Cancel the timer
+
+        startGame(); // Restart the game loop
+    }
+
+    static World chooseRandomMap() {
+        // Randomly choose a new world to start the game on
+        List<World> loadedWorlds = getWorlds();
+
+        if (!loadedWorlds.isEmpty()) {
+            return loadedWorlds.get(new Random().nextInt(loadedWorlds.size()));
+        }
+
+        return null;
     }
 
     public boolean joinTeam(Player player, String team) {
-        if (team == "red") {
+        if (team.equalsIgnoreCase("red")) {
             if (!redTeam.hasEntry(player.getName())) {
                 if (blueTeam.getSize() <= redTeam.getSize()) {
                     redTeam.addEntry(player.getName());
@@ -130,7 +167,7 @@ public class CaptureTheFlagGame {
             }
         }
 
-        else if (team == "blue") {
+        else if (team.equalsIgnoreCase("blue")) {
             if (!blueTeam.hasEntry(player.getName())) {
                 if (redTeam.getSize() <= blueTeam.getSize()) {
                     blueTeam.addEntry(player.getName());
@@ -145,7 +182,7 @@ public class CaptureTheFlagGame {
             }
         }
 
-        else if (team == "spectator") {
+        else if (team.equalsIgnoreCase("spectator")) {
             spectatorTeam.addEntry(player.getName());
             redTeam.removeEntry(player.getName());
             blueTeam.removeEntry(player.getName());

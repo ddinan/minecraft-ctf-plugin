@@ -11,6 +11,10 @@ commands:
     description: Lists all maps.
     usage: /<command>
     permission: ranks.player
+  newgame:
+    description: Starts a new game.
+    usage: /<command> [map name]
+    permission: ranks.vip
   visit:
     description: Visits a map.
     usage: /<command> [map name]

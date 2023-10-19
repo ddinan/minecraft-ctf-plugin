@@ -1,5 +1,6 @@
 package ctf.ctfplugin.commands;
 
+import ctf.ctfplugin.CaptureTheFlagGame;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import static org.bukkit.Bukkit.getWorld;
 
-public class VisitCommand implements CommandExecutor {
+public class NewGameCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = (Player) sender;
@@ -18,15 +19,16 @@ public class VisitCommand implements CommandExecutor {
         }
 
         String worldName = args[0];
-        World targetWorld = getWorld(worldName);
+        World newWorld = getWorld(worldName);
 
-        if (targetWorld == null) {
-            player.sendMessage("The specified world does not exist.");
-            return true;
+        if (newWorld != null) {
+            CaptureTheFlagGame.endGame(newWorld);
+            player.sendMessage("Started a new game in world " + worldName);
         }
 
-        player.teleport(targetWorld.getSpawnLocation());
-        player.sendMessage("Teleported to " + worldName);
+        else {
+            player.sendMessage("The specified world does not exist.");
+        }
 
         return true;
     }
