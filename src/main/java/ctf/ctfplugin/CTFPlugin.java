@@ -16,11 +16,8 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
 
-        Location redFlagPosition = new Location(getServer().getWorld("world"), 76, 74, -5); // Set the coordinates
-        Location blueFlagPosition = new Location(getServer().getWorld("world"), 78, 74, -5); // Set the coordinates
-
         // Create a game instance
-        game = new CaptureTheFlagGame(redFlagPosition, blueFlagPosition);
+        game = new CaptureTheFlagGame();
 
         // Set up game event listeners
         getServer().getPluginManager().registerEvents(new EventListener(game), this);
@@ -48,15 +45,8 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void handlePlayerJoin(PlayerJoinEvent event) {
         Player p = event.getPlayer();
-        disableHacks(p);
 
-        // Add the player to the Boss Bar when they join
+        // Sync the player with the game's boss bar
         game.addPlayerToBossBar(p);
-    }
-
-    private void disableHacks(Player p) {
-        p.setFlying(false);
-        p.setAllowFlight(false);
-        p.setFoodLevel(0); // Prevents sprinting
     }
 }

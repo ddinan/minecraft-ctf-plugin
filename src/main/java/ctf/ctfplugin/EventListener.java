@@ -49,24 +49,24 @@ public class EventListener implements Listener {
                         game.redFlagCarrier = p;
 
                         String message = ChatColor.BLUE + "" + ChatColor.BOLD + p.getName() + ChatColor.RESET + ChatColor.GRAY + " has taken the " + ChatColor.RED + ChatColor.BOLD + "red " + ChatColor.RESET + ChatColor.GRAY + "flag!";
-                        game.messageWorld(getWorld("world"), message);
+                        game.messageWorld(game.world, message);
                         return;
                     }
                 }
 
                 else if (redTeam.hasEntry(p.getName())) {
                     if (game.blueFlagCarrier == p) {
-                        game.captureFlag(p);
-
                         String message = ChatColor.RED + "" + ChatColor.BOLD + p.getName() + ChatColor.RESET + ChatColor.GRAY + " has captured the " + ChatColor.BLUE + ChatColor.BOLD + "blue " + ChatColor.RESET + ChatColor.GRAY + "flag!";
-                        game.messageWorld(getWorld("world"), message);
+                        game.messageWorld(game.world, message);
 
                         event.setCancelled(true);
+                        game.captureFlag(p);
                         return;
                     }
                 }
 
                 event.setCancelled(true);
+                return;
             }
 
             else if (clickedBlockLocation.equals(game.blueFlagPosition)) {
@@ -75,19 +75,18 @@ public class EventListener implements Listener {
                         game.blueFlagCarrier = p;
 
                         String message = ChatColor.RED + "" + ChatColor.BOLD + p.getName() + ChatColor.RESET + ChatColor.GRAY + " has taken the " + ChatColor.BLUE + ChatColor.BOLD + "blue " + ChatColor.RESET + ChatColor.GRAY + "flag!";
-                        game.messageWorld(getWorld("world"), message);
+                        game.messageWorld(game.world, message);
                         return;
                     }
                 }
 
                 else if (blueTeam.hasEntry(p.getName())) {
                     if (game.redFlagCarrier == p) {
-                        game.captureFlag(p);
-
                         String message = ChatColor.BLUE + "" + ChatColor.BOLD + p.getName() + ChatColor.RESET + ChatColor.GRAY + " has captured the " + ChatColor.RED + ChatColor.BOLD + "red " + ChatColor.RESET + ChatColor.GRAY + "flag!";
-                        game.messageWorld(getWorld("world"), message);
+                        game.messageWorld(game.world, message);
 
                         event.setCancelled(true);
+                        game.captureFlag(p);
                         return;
                     }
                 }

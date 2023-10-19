@@ -28,6 +28,7 @@ public class CaptureTheFlagGame {
     public static Location blueFlagPosition;
     public static Location redSpawnPosition;
     public static Location blueSpawnPosition;
+    public static Location spawnPosition;
 
     public static Player redFlagCarrier = null;
     public static Player blueFlagCarrier = null;
@@ -42,12 +43,8 @@ public class CaptureTheFlagGame {
 
     public static World world;
 
-    public CaptureTheFlagGame(Location redFlagPosition, Location blueFlagPosition) {
-        this.redFlagPosition = redFlagPosition;
-        this.blueFlagPosition = blueFlagPosition;
-
+    public CaptureTheFlagGame() {
         world = chooseRandomMap();
-
         startGame();
     }
 
@@ -93,14 +90,16 @@ public class CaptureTheFlagGame {
             properties.load(input);
 
             // Place flags in the right spot
-            redFlagPosition = parseLocation(properties.getProperty("redFlagPosition"));
-            blueFlagPosition = parseLocation(properties.getProperty("blueFlagPosition"));
+            redFlagPosition = parseLocation(properties.getProperty("redFlagPosition"), false);
+            blueFlagPosition = parseLocation(properties.getProperty("blueFlagPosition"), false);
 
             respawnFlag("red");
             respawnFlag("blue");
 
-            redSpawnPosition = parseLocation(properties.getProperty("redSpawnPosition"));
-            blueSpawnPosition = parseLocation(properties.getProperty("blueSpawnPosition"));
+            redSpawnPosition = parseLocation(properties.getProperty("redSpawnPosition"), true);
+            blueSpawnPosition = parseLocation(properties.getProperty("blueSpawnPosition"), true);
+            spawnPosition = parseLocation(properties.getProperty("spawnPosition"), true);
+            world.setSpawnLocation((int)spawnPosition.getX(), (int)spawnPosition.getY(), (int)spawnPosition.getZ()); // Update the world's spawn point
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -114,11 +113,14 @@ public class CaptureTheFlagGame {
         }
     }
 
-    private static Location parseLocation(String input) {
+    private static Location parseLocation(String input, Boolean offset) {
         String[] parts = input.split(",");
-        double x = Double.parseDouble(parts[0]);
-        double y = Double.parseDouble(parts[1]);
-        double z = Double.parseDouble(parts[2]);
+
+        double offsetAmount = offset ? 0.5 : 0; // Use 0.5 to offset the location to its center
+        double x = Double.parseDouble(parts[0]) + offsetAmount;
+        double y = Double.parseDouble(parts[1]) + offsetAmount;
+        double z = Double.parseDouble(parts[2]) + offsetAmount;
+
         return new Location(world, x, y, z);
     }
 
@@ -212,6 +214,9 @@ public class CaptureTheFlagGame {
                     player.setDisplayName(ChatColor.RED + player.getName());
                     player.setPlayerListName(ChatColor.RED + player.getName());
 
+                    disableHacks(player);
+                    player.teleport(redSpawnPosition); // Respawn the player at the team's spawn point
+
                     return true;
                 }
             }
@@ -227,6 +232,9 @@ public class CaptureTheFlagGame {
                     player.setDisplayName(ChatColor.BLUE + player.getName());
                     player.setPlayerListName(ChatColor.BLUE + player.getName());
 
+                    disableHacks(player);
+                    player.teleport(blueSpawnPosition); // Respawn the player at the team's spawn point
+
                     return true;
                 }
             }
@@ -240,10 +248,24 @@ public class CaptureTheFlagGame {
             player.setDisplayName(ChatColor.GRAY + player.getName());
             player.setPlayerListName(ChatColor.GRAY + player.getName());
 
+            enableHacks(player);
+            player.teleport(world.getSpawnLocation()); // Respawn the player at the world's spawn point
+
             return true;
         }
 
         return false; // Player is already in a team or teams are not balanced
+    }
+
+    private void enableHacks(Player p) {
+        p.setAllowFlight(true);
+        p.setFoodLevel(20);
+    }
+
+    private void disableHacks(Player p) {
+        p.setFlying(false);
+        p.setAllowFlight(false);
+        p.setFoodLevel(0); // Prevents sprinting
     }
 
     public void captureFlag(Player player) {
