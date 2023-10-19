@@ -28,6 +28,12 @@ public class EventListener implements Listener {
         Player p = event.getPlayer();
 
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            if (!redTeam.hasEntry(p.getName()) && !blueTeam.hasEntry(p.getName())) {
+                p.sendMessage("Please join a team to build.");
+                event.setCancelled(true);
+                return;
+            }
+
             Location clickedBlockLocation = event.getClickedBlock().getLocation();
 
             Block clickedBlock = event.getClickedBlock();
@@ -94,6 +100,13 @@ public class EventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
+
+        if (!redTeam.hasEntry(player.getName()) && !blueTeam.hasEntry(player.getName())) {
+            player.sendMessage("Please join a team to build.");
+            event.setCancelled(true);
+            return;
+        }
+
         Block placedBlock = event.getBlock();
         Location placedLocation = placedBlock.getLocation();
 

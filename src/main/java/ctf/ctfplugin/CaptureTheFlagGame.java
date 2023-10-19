@@ -19,6 +19,8 @@ import java.util.Random;
 import static org.bukkit.Bukkit.*;
 
 public class CaptureTheFlagGame {
+    public static boolean roundInProgress = false;
+
     public static Location redFlagLocation;
     public static Location blueFlagLocation;
 
@@ -44,6 +46,7 @@ public class CaptureTheFlagGame {
         setUpTeams();
         setUpMap();
         startGameTimer(); // Start the game timer
+        roundInProgress = true;
     }
 
     private static void setUpTeams() {
@@ -122,6 +125,7 @@ public class CaptureTheFlagGame {
 
     public static void endGame(World newWorld) {
         // Reset game state, clear flags, etc.
+        roundInProgress = false;
         redFlagCarrier = null;
         blueFlagCarrier = null;
 
