@@ -1,6 +1,6 @@
 package ctf.ctfplugin;
 
-import ctf.ctfplugin.commands.JoinCommand;
+import ctf.ctfplugin.commands.*;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,6 +27,8 @@ public final class CTFPlugin extends JavaPlugin implements Listener {
 
         // Register commands
         this.getCommand("join").setExecutor(new JoinCommand());
+        this.getCommand("maps").setExecutor(new MapsCommand());
+        this.getCommand("visit").setExecutor(new VisitCommand());
     }
 
     @Override

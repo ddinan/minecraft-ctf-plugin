@@ -7,3 +7,11 @@ commands:
     description: Joins a team.
     usage: /<command> [red|blue|spectator]
     permission: ranks.player
+  maps:
+    description: Lists all maps.
+    usage: /<command>
+    permission: ranks.player
+  visit:
+    description: Visits a map.
+    usage: /<command> [map name]
+    permission: ranks.player
