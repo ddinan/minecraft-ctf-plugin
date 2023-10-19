@@ -21,6 +21,11 @@ public class NewGameCommand implements CommandExecutor {
         String worldName = args[0];
         World newWorld = getWorld(worldName);
 
+        if (worldName.equalsIgnoreCase("hub")) {
+            player.sendMessage("Cannot start a new game in the hub world.");
+            return true;
+        }
+
         if (newWorld != null) {
             CaptureTheFlagGame.endGame(newWorld);
             player.sendMessage("Started a new game in world " + worldName);

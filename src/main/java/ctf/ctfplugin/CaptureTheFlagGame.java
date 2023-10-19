@@ -1,9 +1,6 @@
 package ctf.ctfplugin;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -12,9 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.FileUtil;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -45,10 +42,13 @@ public class CaptureTheFlagGame {
 
     public CaptureTheFlagGame() {
         world = chooseRandomMap();
+
+        System.out.println("Chosen World: " + world);
         startGame();
     }
 
     static void startGame() {
+        backupWorld(new File("maps/" + world.getName()), new File("map_backups/" + world.getName())); // Make a copy of the world
         setUpTeams();
         setUpMap();
         startGameTimer(); // Start the game timer
@@ -180,16 +180,56 @@ public class CaptureTheFlagGame {
             newWorld = chooseRandomMap();
         }
 
-        world = newWorld;
-
         // Teleport players to the new world
         for (Player player : getOnlinePlayers()) {
             player.teleport(newWorld.getSpawnLocation());
         }
 
+        backupWorld(new File("map_backups/" + world.getName()), new File("maps/" + world.getName())); // Restore the world before restarting the game
+
+        world = newWorld;
+
         gameTimer.cancel(); // Cancel the timer
 
         startGame(); // Restart the game loop
+    }
+
+    public static void backupWorld(File source, File destination) {
+        // Unload the world
+        String worldName = source.getName();
+        World world = getWorld(worldName);
+
+        if (world != null) {
+            getServer().unloadWorld(world, false);
+        }
+
+        // Perform the backup
+        if (source.isDirectory()) {
+            if (!destination.exists()) {
+                destination.mkdir();
+            }
+
+            File[] files = source.listFiles();
+
+            for (File file : files) {
+                File toFile = new File(destination, file.getName());
+
+                FileUtil.copy(file, toFile);
+
+                if (file.isDirectory()) {
+                    backupWorld(file, toFile);
+                }
+            }
+        }
+
+        else {
+            FileUtil.copy(source, destination);
+        }
+
+        // Reload the world if it was unloaded
+        if (world != null) {
+            getServer().createWorld(new WorldCreator(worldName));
+        }
     }
 
     static World chooseRandomMap() {
